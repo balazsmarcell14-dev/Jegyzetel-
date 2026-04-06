@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using Microsoft.Win32;
+using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,6 +19,7 @@ namespace jegyzetelo
     public partial class MainWindow : Window
     {
         private TextWriterAndReader _textWriterAndReader = new TextWriterAndReader();
+        private DocumentList _documents = new DocumentList();
         public MainWindow()
         {
             InitializeComponent();
@@ -30,35 +32,32 @@ namespace jegyzetelo
             _textWriterAndReader.Save(tbContent.Text);
 
         }
-
-
-        private void tbContent_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            _textWriterAndReader.loadFile(namingFile.Text);
-        }
         
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            namingFile.Visibility = Visibility.Visible;
-            saveNameButton.Visibility = Visibility.Visible;
-        }
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                _textWriterAndReader.FilePath = saveFileDialog.FileName;
+                _textWriterAndReader.CreateFile();
+                _documents.AddDocument(_textWriterAndReader.FilePath);
 
-        private void saveNameButton_Click(object sender, RoutedEventArgs e)
-        {
-            _textWriterAndReader.saveFileName(namingFile.Text);
-            namingFile.Visibility = Visibility.Collapsed;
-            saveNameButton.Visibility = Visibility.Collapsed;
-        }
-
-        private void namingFile_TextChanged(object sender, TextChangedEventArgs e)
-        {
-
+                showFiles.ItemsSource = null;
+                showFiles.ItemsSource = _documents.Documents;
+                
+            }
         }
 
         private void showFiles_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-
+            if (showFiles.SelectedItem == null)
+            {
+                return;
+            }
+            _textWriterAndReader.FilePath = showFiles.SelectedItem.ToString();
+            tbContent.Text = _textWriterAndReader.ReadFile();
         }
     }
 }

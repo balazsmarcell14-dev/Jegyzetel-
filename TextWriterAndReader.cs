@@ -4,30 +4,48 @@ namespace jegyzetelo
 {
     public class TextWriterAndReader
     {
-        string fileName;
-        string path;
-        
+        private string _filePath = string.Empty;
+        //private const string cPath = @"C:\Users\balaz\Downloads\Jegyzetel--main\Jegyzetel--main\";
+
         public void Save(string text)
         {
-            path = $@"C:\Users\balaz\Documents\c#\jegyzetelő\jegyzetelo\{fileName}";
-
-            using (var file = File.CreateText(path))
-            { 
+            using (var file = CreateFile())
+            {
                 file.Write(text);
             }
         }
 
-        public void saveFileName(string name)
+        public StreamWriter CreateFile()
         {
-            fileName = name + ".txt";
+            return File.CreateText(FilePath);
         }
 
-        public void loadFile(string name)
+        public string FilePath
         {
-            path = $@"C:\Users\balaz\Documents\c#\jegyzetelő\jegyzetelo\{fileName}";
-            using (var file = File.OpenText(path))
+            get { return _filePath; }
+            set
             {
-                string text = file.ReadToEnd();
+                if (!value.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
+                {
+                    _filePath = value + ".txt";
+                }
+                else
+                {
+                    _filePath = value;
+                }
+            }
+        }
+
+        public string ReadFile()
+        {
+            if (!File.Exists(FilePath))
+            {
+                throw new Exception("Ilyen fájl nem létezik.");
+            }
+            
+            using (var file = File.OpenText(FilePath))
+            {
+                return file.ReadToEnd();
             }
         }
     }
